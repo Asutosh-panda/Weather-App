@@ -1,0 +1,436 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+</head>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap" rel="stylesheet">
+<style type="text/css" media="all">
+*{
+  margin:0;
+  padding: 0;
+  box-sizing:border-box;
+ ;
+}
+body{
+  height: 100vh;
+  transition: 1s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+  background:linear-gradient(rgb(60,130,170),rgb(63,160,173)) ;
+}
+
+
+.city-sec{
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  
+}
+.city{
+  align-self: center;
+
+  font-size: 12vmin;
+  font-family: 'Dancing Script', cursive;
+}
+.date{
+
+  font-size: 4vmin;
+  font-family: 'Permanent Marker', cursive;
+}
+
+
+
+.temperature{
+   position:absolute;
+   display:flex;
+   top: 20vh;
+   align-self: center;
+}
+#temp{
+ position:relative;
+ font-size:14vmin; 
+}
+#small{
+  position: relative;
+  top:6vmin;
+  font-size: 8vmin;
+}
+#icon1{
+  position: relative;
+  
+  height: 20vh;
+  width: 50vw;
+}
+.button{
+  border: 2px solid;
+position: absolute;
+top: 7vmin;
+width: 10vmin;
+height: 7vmin;
+left: 37vmin;
+z-index: 1;
+opacity: 0;
+}
+
+
+.others{
+ 
+  position: absolute;
+top: 40vh;
+display: flex;
+font-size: 4vmin;
+flex-direction: column;
+left: 62vw;
+font-family: 'Dancing Script';
+  }
+img{
+    
+width: 14vmin;
+opacity: 0;
+animation:windAni  infinite linear;
+  }
+
+
+
+
+.input{
+  position: absolute;
+  top:90vh;
+  align-self: center;
+  opacity: 0;
+}
+#search{
+  width:60vw;
+  font-size: 3vmin;
+}
+#btn{
+  
+  width:15vw;
+  font-size: 3vmin;
+}
+
+
+
+
+
+
+.total{
+    display:flex;
+    position: absolute;
+    top:65vh;
+   height: 25vh;
+    overflow-x: scroll;
+    overflow-y:hidden;
+    width:100vw; 
+    font-family: 'Sriracha', cursive; 
+  }
+.each{
+    display:flex;
+    flex-direction: column;
+      margin-right: 1vw;
+    font-size: 4vmin;
+  } 
+.icon2{
+  height: 7vmin;
+position: relative;
+width: 11vw;
+top: 5vmin;
+left: 12vmin;
+}
+.forecastTemp{
+  margin-top: 4vmin;
+}
+
+  @keyframes windAni{
+    100%{
+      transform:rotate(360deg);
+    }
+  }
+</style>
+<body>
+  
+       <div class="city-sec">
+         <div class="city"></div>
+         <div class="date"></div>
+       </div>
+      
+       <div class="temperature">
+         <span id="temp"></span>
+         <span id="small"></span >
+          <button class="button"></button>
+          <canvas id="icon1"></canvas>         
+       </div>
+       
+      
+       <div class="others">
+        <span id="humidity"></span>
+        <span id="pressure"></span>
+        <span id="windspeed"></span>
+        <img class="img" src="2.jpg"/>
+      </div>
+      
+
+      <div class="total">
+      </div>
+      
+       <div class="input">
+       <input type="text" name="search" id="search" placeholder="Find    your    city"/>
+       <button id="btn">search</button>
+       </div>
+              
+
+</body>
+<script src="skycons.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  setInterval(() => {
+    document.body.style.background='linear-gradient(rgb(160,80,90),rgb(153,20,113))'
+  }, 7000);
+ var t=0
+ var te="C"
+ var c=0
+ var small=document.getElementById("small")
+  var btn=document.getElementById("btn")
+  var temp=document.getElementById("temp")
+  var city=document.getElementById("search")
+  btn.addEventListener('click',()=>{
+    var img=document.querySelector('.img')
+    img.style.animationIterationCount="1"
+    img.style.opacity='0'
+    img.style.animationDuration=`0s`
+    api= `https://api.openweathermap.org/data/2.5/weather?q=${city.value}&appid=813e9dce5890b3223345a170df279448`
+    
+    fetch(api)
+    .then(response=>{
+      return response.json()
+    })
+    .then(data=>{
+      setDate()
+       setTemp(data)
+       forecast(data.coord.lat,data.coord.lon)
+    })
+   city.value=""
+ 
+  })
+  
+    
+  var temp=document.getElementById("temp")
+  if(navigator.geolocation){
+   navigator.geolocation.getCurrentPosition(position=>{
+     console.log(position)
+    var lat= position.coords.latitude
+    var lon=position.coords.longitude
+    console.log(lat,lon)
+    const api=`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=813e9dce5890b3223345a170df279448`
+    fetch(api)
+    .then(response=>{
+      return response.json()
+    })
+    .then(data=>{
+       setDate()
+       setTemp(data)
+       forecast(lat,lon)
+    })
+   })
+  }
+  function setDate(){
+    
+    let myDate = new Date()
+    day=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+    month=["January","February","March","April","May","June","July","August","September","October","November","December"]
+    var d=document.querySelector(".date")
+    
+    d.innerText=`${day[myDate.getDay()]},  ${myDate.getDate()} ${month[myDate.getMonth()]} ${myDate.getFullYear()}`
+  }
+    
+
+  function setTemp(data)
+  {
+   console.log(data)
+   console.log(data.name)
+   t=data.main.temp-273.15
+   
+   
+   
+   temp.innerText=`${t.toFixed(1)} C`
+   small.innerText="/F"
+   var city=document.querySelector(".city")
+   city.innerText=data.name;
+   
+   var ic=data.weather[0].main 
+   var id;
+   if(ic=="Rain"){
+   id="RAIN"
+  
+   }
+   else if(ic=="Thunderstrom" || ic=="Drizzle"){
+   id="WIND"
+ 
+   }
+   else if(ic=="Clouds"){
+   if(data.weather[0].description=="few clouds"){
+   id="PARTLY_CLOUDY"
+
+   }
+   else{
+   id="CLOUDY"
+
+   }
+   }
+   
+   else if(ic=="Snow"){
+   id="SNOW"
+    
+   }
+   else if(ic=="Clear"){
+   id="CLEAR_DAY"
+    
+   }
+   else{
+   id="FOG"
+   }
+  var skycons = new Skycons({"color": "white"});
+  skycons.add("icon1", Skycons[id]);
+  skycons.play();
+  
+  var humidity=document.getElementById('humidity')
+  var pressure=document.getElementById('pressure')
+  var wind=document.getElementById('windspeed')
+  humidity.innerText="Humidity:"+data.main.humidity+"%";
+  pressure.innerText=`Pressure: ${data.main.pressure/1000} bar`;
+ 
+  wind.innerText=`Windspeed: ${(data.wind.speed*3.6).toFixed(2)} km/h`;
+  
+  var img=document.querySelector('.img')
+  img.style.opacity="1"
+  speed=7/(data.wind.speed*3.6)
+  img.style.animationDuration=`${speed}s`
+  img.style.animationIterationCount="infinite"
+   document.querySelector(".input").style.opacity="1"
+    
+  }
+
+ 
+
+  document.querySelector(".button").addEventListener("click",()=>{
+    if(te=="C"){
+       ct=(t*9/5)+32
+    temp.innerText=`${ct.toFixed(1)} F`
+    small.innerText="/C"
+    t=ct
+    te="F"
+    
+  }
+  else{
+    ct=(t-32)*5/9
+    temp.innerText=`${ct.toFixed(1)} C`
+    small.innerText="/F"
+    t=ct 
+    te='C'
+  }
+  }
+  )
+
+ function forecast (lat,lon)
+ { 
+    c=c+1
+    if(c>1)
+     {
+        let parent=document.querySelector('.total')
+        while (parent.firstChild) 
+        {
+         parent.removeChild(parent.firstChild);
+        }
+   }
+
+     api=` https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=daily,minutely&appid=813e9dce5890b3223345a170df279448`
+     
+     fetch(api)
+     .then(response=>{
+     return response.json()
+     })
+     .then(data=>{
+     console.log(data)
+     
+     
+     for(i=1;i<=24;i++)
+     {
+    
+     time=data.hourly[i].dt 
+     dateObj = new Date(time*1000); 
+     timeHour=dateObj.toLocaleString(). slice(11)
+     if(timeHour.slice(1,2)==':')
+     {
+     timeHour=timeHour.slice(0,4)+timeHour.slice(-2)}
+     else{
+       timeHour=timeHour.slice(0,5)+timeHour.slice(-2)}
+     
+   
+     tempHour=((data.hourly[i].temp)-273).toFixed(1)
+     weatherHour=data.hourly[i].weather[0].main
+      let parent=document.querySelector('.total')
+      let element=document.createElement('div')
+      element.className="each"
+      let temperature=document.createElement('span')
+      let ti=document.createElement('span')
+     temperature.className='forecastTemp'
+     let icon=document.createElement('canvas')
+      icon.className="icon2"
+      icon.id=`icon${i+1}`
+     weatherForecast= data.hourly[i].weather[0].main
+     
+     id=setIcon(weatherForecast)
+     parent.appendChild(icon)
+     var skycons = new Skycons({"color": "yellow"});
+    skycons.add(`icon${i+1}`, Skycons[id]);
+    skycons.play();
+  
+     
+  
+      temperature.innerText=tempHour
+      ti.innerText=timeHour
+      element.appendChild(ti)
+      element.appendChild(temperature)
+      parent.appendChild(element)
+     }
+     
+     
+     })
+ }
+ function setIcon(w){
+   var ic=w
+   
+   if(ic=="Rain"){
+   id="RAIN"
+   }
+   else if(ic=="Thunderstrom" || ic=="Drizzle"){
+   id="WIND"
+   }
+   else if(ic=="Clouds")
+   {
+   id="CLOUDY"
+   }
+   
+   else if(ic=="Snow"){
+   id="SNOW"
+   }
+   else if(ic=="Clear"){
+   id="CLEAR_DAY"
+   }
+   else{
+   id="FOG"
+   }
+  return id
+   
+   
+   
+     
+ }
+</script>
+
+</html>
